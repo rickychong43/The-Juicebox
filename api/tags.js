@@ -1,48 +1,46 @@
 const express = require('express');
 const tagsRouter = express.Router();
 
-const { 
-  getAllTags,
-  getPostsByTagName
+const {
+    getAllTags,
+    getPostsByTagName
+   
 } = require('../db');
 
 tagsRouter.get('/', async (req, res, next) => {
-  try {
-    const tags = await getAllTags();
-  
-    res.send({
-      tags
-    });
-  } catch ({ name, message }) {
-    next({ name, message });
-  }
+    try {
+        const tags = await getAllTags();
+
+        res.send({
+            tags
+        });
+    } catch ({ name, message }) {
+        next({ name, message });
+    }
 });
 
 tagsRouter.get('/:tagName/posts', async (req, res, next) => {
-  let { tagName } = req.params;
-  
-  // decode %23happy to #happy
-  tagName = decodeURIComponent(tagName)
+    const { tagName } = req.params;
 
-  try {
-    const allPosts = await getPostsByTagName(tagName);
+    try {
+        const allPosts = await getPostsByTagName(tagName);
 
-    const posts = allPosts.filter(post => {
-      if (post.active) {
-        return true;
-      }
+        const posts = allPosts.filter(post => {
+            if (post.active) {
+                return true;
+            }
 
-      if (req.user && req.user.id === post.author.id) {
-        return true;
-      }
+            if (req.user && req.user.id === post.author.id) {
+                return true;
+            }
 
-      return false;
-    })
+            return false;
+        })
 
-    res.send({ posts });
-  } catch ({ name, message }) {
-    next({ name, message });
-  }
+        res.send({ posts });
+    } catch ({ name, message }) {
+        next({ name, message });
+    }
 });
 
 module.exports = tagsRouter;
